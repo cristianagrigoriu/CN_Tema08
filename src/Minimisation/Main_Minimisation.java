@@ -15,7 +15,14 @@ public class Main_Minimisation {
 			rf.readFromFile(fileName);
 			
 			MinMethod mm = new MinMethod();
-			mm.findMinimum();
+			System.out.print("The minimum point is ");
+			double result[] = mm.findMinimum();
+			if (result != null) {
+				for(int i=0; i<result.length; i++)
+					System.out.print(result[i] + " ");
+			}
+			else
+				System.out.print("null");
 		}
 	}
 }

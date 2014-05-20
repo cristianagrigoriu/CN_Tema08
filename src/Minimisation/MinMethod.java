@@ -2,12 +2,12 @@ package Minimisation;
 
 public class MinMethod {
 
-	double findMinimum() {
+	double[] findMinimum() {
 		Functions f = new Functions();
-		int n = f.getNFunction1();
-		double[][] w = getIdenticMatrix(n);
-		double[] initialX = f.getInitialXFunction1();
-		double[] g = f.getDerivateFunction1(initialX[0], initialX[1]);
+		int n = f.getNFunction2();
+		//double[][] w = getIdenticMatrix(n);
+		double[] initialX = f.getInitialXFunction2();
+		double[] g = f.getDerivateFunction2(initialX[0], initialX[1], initialX[2]);
 		int k = 0;
 		
 		double[] d = new double[n];
@@ -15,14 +15,23 @@ public class MinMethod {
 		
 		double euclideanNorm = euclideanNorm(g);
 		
-		while (euclideanNorm > Math.pow(10, -ReadFile.precision) && k <= 200) {
+		while (euclideanNorm > Math.pow(10, -ReadFile.precision) && k <= 100) {
 			d = getMinusArray(g); //metoda pantei maxime
-			t = linesearch(initialX, d);
 			
-			System.out.println("t = " + t);
+			t = linesearch(initialX, d);
+			while(t == -1)
+				t = linesearch(initialX, d);
+			initialX = getSumOfVectors(initialX, multiplyVectorWithScalar(t, d));
+				
+			g = f.getDerivateFunction2(initialX[0], initialX[1], initialX[2]);
+			k++;
+			euclideanNorm = euclideanNorm(g);
 		}
 		
-		return 0;
+		//if(euclideanNorm <= Math.pow(10, -ReadFile.precision))
+			return initialX;
+		//else 
+			//return null;
 	}
 	
 	double[][] getIdenticMatrix(int n) {
@@ -50,7 +59,7 @@ public class MinMethod {
 	private double linesearch(double[] x, double[] d) {
 		double y0 = Math.random(), y1 = Math.random();
 		
-		System.out.println("y0 = " + y0 + " y1 = " + y1);
+		//System.out.println("y0 = " + y0 + " y1 = " + y1);
 		
 		int k = 1;
 		double deltaY;
@@ -62,11 +71,12 @@ public class MinMethod {
 			y0 = y1;
 			y1 = y1 - deltaY;
 			k++;
-		} while(Math.abs(deltaY) >= Math.pow(10, -ReadFile.precision) && k<=200 && Math.abs(deltaY) <= Math.pow(10, 8));
+		} while(Math.abs(deltaY) >= Math.pow(10, -6) && k<=200 && Math.abs(deltaY) <= Math.pow(10, 8));
 		
-		if (Math.abs(deltaY) < Math.pow(10, -ReadFile.precision))
+		if (Math.abs(deltaY) < Math.pow(10, -6))
 			return y1;
-		else return (Double) null;
+		else 
+			return -1;
 	}
 	
 	private double computeDeltaY(double y0, double y1, double[] x, double[] d) {
@@ -85,7 +95,7 @@ public class MinMethod {
 		double[] sum = getSumOfVectors(x, multiplyVectorWithScalar(y, d));
 		
 		Functions f = new Functions();
-		double nablaF[] = f.getDerivateFunction1(sum[0], sum[1]);
+		double nablaF[] = f.getDerivateFunction2(sum[0], sum[1], sum[2]);
 		
 		return multiplyVectors(nablaF, d);
 	}
