@@ -13,6 +13,9 @@ public class Main_Minimisation {
 		if (fileName != null) {
 			ReadFile rf = new ReadFile();
 			rf.readFromFile(fileName);
+			
+			MinMethod mm = new MinMethod();
+			mm.findMinimum();
 		}
 	}
 }

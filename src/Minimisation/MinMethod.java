@@ -2,10 +2,6 @@ package Minimisation;
 
 public class MinMethod {
 
-	public MinMethod() {
-		
-	}
-
 	double findMinimum() {
 		Functions f = new Functions();
 		int n = f.getNFunction1();
@@ -15,11 +11,15 @@ public class MinMethod {
 		int k = 0;
 		
 		double[] d = new double[n];
+		double t;
 		
 		double euclideanNorm = euclideanNorm(g);
 		
 		while (euclideanNorm > Math.pow(10, -ReadFile.precision) && k <= 200) {
 			d = getMinusArray(g); //metoda pantei maxime
+			t = linesearch(initialX, d);
+			
+			System.out.println("t = " + t);
 		}
 		
 		return 0;
@@ -44,7 +44,70 @@ public class MinMethod {
 		double[] newArray = new double[array.length];
 		for(int i=0; i<array.length; i++)
 			newArray[i] = -array[i];
-		return newArray;
-			
+		return newArray;		
+	}
+	
+	private double linesearch(double[] x, double[] d) {
+		double y0 = Math.random(), y1 = Math.random();
+		
+		System.out.println("y0 = " + y0 + " y1 = " + y1);
+		
+		int k = 1;
+		double deltaY;
+		
+		do {
+			deltaY = computeDeltaY(y0, y1, x, d);
+			if (Math.abs(computeDenominator(y0, y1, x, d)) <= Math.pow(10, -ReadFile.precision))
+				deltaY = Math.pow(10, -3);
+			y0 = y1;
+			y1 = y1 - deltaY;
+			k++;
+		} while(Math.abs(deltaY) >= Math.pow(10, -ReadFile.precision) && k<=200 && Math.abs(deltaY) <= Math.pow(10, 8));
+		
+		if (Math.abs(deltaY) < Math.pow(10, -ReadFile.precision))
+			return y1;
+		else return (Double) null;
+	}
+	
+	private double computeDeltaY(double y0, double y1, double[] x, double[] d) {
+		double qPrimeYM = getQPrime(y1, x, d);
+		double qPrimeYMM = getQPrime(y0, x, d);
+		return qPrimeYM * (y1 - y0) / (qPrimeYM - qPrimeYMM);
+	}
+	
+	private double computeDenominator(double y0, double y1, double[] x, double[] d) {
+		double qPrimeYM = getQPrime(y1, x, d);
+		double qPrimeYMM = getQPrime(y0, x, d);
+		return qPrimeYM - qPrimeYMM;
+	}
+	
+	private double getQPrime(double y, double[] x, double[] d) {
+		double[] sum = getSumOfVectors(x, multiplyVectorWithScalar(y, d));
+		
+		Functions f = new Functions();
+		double nablaF[] = f.getDerivateFunction1(sum[0], sum[1]);
+		
+		return multiplyVectors(nablaF, d);
+	}
+	
+	private double[] getSumOfVectors(double[] x, double[] d) {
+		double[] result = new double[x.length];
+		for (int i=0; i<x.length; i++)
+			result[i] = x[i] + d[i];
+		return result;
+	}
+	
+	private double[] multiplyVectorWithScalar(double number, double[] vector) {
+		double[] result = new double[vector.length];
+		for (int i=0; i<vector.length; i++)
+			result[i] = number * vector[i];
+		return result;
+	}
+	
+	private double multiplyVectors(double[] vector1, double[] vector2) {
+		double result = 0;
+		for (int i=0; i<vector1.length; i++)
+			result += vector1[i] * vector2[i];
+		return result;
 	}
 }
